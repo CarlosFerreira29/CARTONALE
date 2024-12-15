@@ -1,0 +1,1587 @@
+<html><head><base href="." /><meta charset="UTF-8" />
+<title>Sistema de Controle de Produção</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-image: url('/images.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: #1a237e;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .nav-menu {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .nav-button {
+    background: #1a237e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .nav-button:hover {
+    background: #283593;
+  }
+
+  #registroPage, #recordsPage, #terminoPage, #terminoRaiosPage, #retrabalhoPage, #relatoriosPage, #raiosRecordsPage, #paradasPage {
+    display: none;
+  }
+
+  .page-active {
+    display: block !important;
+  }
+
+  .data-table {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+  }
+
+  .data-table th {
+    background: #1a237e;
+    color: white;
+    padding: 15px;
+    text-align: left;
+  }
+
+  .data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .data-table tr:hover {
+    background: #f5f5f5;
+  }
+
+  .add-form {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .form-group {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  button {
+    background: #1a237e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  button:hover {
+    background: #283593;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .delete-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .delete-btn:hover {
+    background: #d32f2f;
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #printSection, #printSection * {
+      visibility: visible;
+    }
+    #printSection {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  }
+
+  .data-table thead {
+    display: table-header-group;
+  }
+
+  .data-table tbody:empty::after {
+    content: "";
+    display: table-row;
+    height: 50px;
+  }
+
+  .data-table tbody:empty {
+    background: #fff;
+  }
+
+  #recordsPage {
+  }
+
+  .total-summary {
+    background: rgba(248, 249, 250, 0.95) !important;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .stat-card h3 {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #1a237e;
+  }
+
+  .stat-card p {
+    margin: 8px 0;
+    font-size: 0.9em;
+  }
+
+  .logo-container {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    max-width: 300px; /* Increased from 200px */
+    height: auto;
+  }
+
+  @media (max-width: 768px) {
+    .logo {
+      max-width: 200px; /* Increased from 150px */
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo {
+      max-width: 150px; /* Increased from 120px */
+    }
+  }
+
+  .system-title {
+    color: white;
+    font-size: 1.5em;
+    margin-top: 10px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    font-weight: 500;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  #introVideo {
+    animation: fadeIn 1s ease-in;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+<div id="introVideo" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #6590d6; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+  <div style="text-align: center;">
+    <img src="logo.png" alt="CartOracle Logo" style="max-width: 300px; margin-bottom: 20px;">
+    <div style="font-size: 24px; color: #1a237e; margin-top: 20px;">
+      Sistema de Gestão de Produção do Setor CPL
+    </div>
+    <div style="animation: fadeIn 2s ease-in;">
+      <div style="width: 200px; height: 2px; background: #1a237e; margin: 20px auto;"></div>
+    </div>
+    <div style="font-size: 12px; color: #d9d9d9; margin-top: 40px;">
+      Desenvolvido por A.Carlos Ferreira <br>
+      Estudante de Gestão da tecnologia da informação - usando Inteligência artificial
+    </div>
+  </div>
+</div>
+
+<div class="logo-container">
+  <img src="logo.png" alt="CartOracle Logo" class="logo">
+  <div class="system-title">Sistema de Gestão de Produção do Setor CPL</div>
+</div>
+<div class="container">
+  
+  <div class="nav-menu">
+    <button class="nav-button" onclick="showPage('registroPage')">Iniciar Produção</button>
+    <button class="nav-button" onclick="showPage('terminoPage')"> Término Produção</button>
+    <button class="nav-button" onclick="showPage('terminoRaiosPage')">Término Raios</button>
+    <button class="nav-button" onclick="showPage('recordsPage')">Registros Produção Lateral</button>
+    <button class="nav-button" onclick="showPage('raiosRecordsPage')">Registros Raios</button>
+    <button class="nav-button" onclick="showPage('retrabalhoPage')">Análise de Retrabalho</button>
+    <button class="nav-button" onclick="showPage('relatoriosPage')">Relatórios</button>
+    <button class="nav-button" onclick="showPage('paradasPage')">Paradas de Máquina</button>
+  </div>
+
+  <div id="registroPage" class="page-active">
+    <div class="add-form">
+      <form id="productionForm">
+        <div class="form-group">
+          <label for="codigoProducaoInicio">Código de Produção</label>
+          <input type="text" 
+                 id="codigoProducaoInicio" 
+                 pattern="\d{7}" 
+                 maxlength="7" 
+                 readonly
+                 required>
+        </div>
+        <div class="form-group">
+          <label for="turnoProducao">Turno</label>
+          <select id="turnoProducao" required>
+            <option value="1">1º Turno (05:40-14:00)</option>
+            <option value="2">2º Turno (13:40-22:00)</option>
+            <option value="3">3º Turno (22:00-05:40)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="colaborador">Colaborador</label>
+          <input type="text" id="colaborador" required>
+        </div>
+        <div class="form-group">
+          <label for="cliente">Cliente</label>
+          <input type="text" id="cliente" required>
+        </div>
+        <div class="form-group">
+          <label for="produto">Produto</label>
+          <input type="text" id="produto" required>
+        </div>
+        <div class="form-group">
+          <label for="especificacaoInicio">Especificação</label>
+          <select id="especificacaoInicio" required>
+            <option value="">Selecione uma especificação</option>
+            <option value="Raios">Raios</option>
+            <option value="Contra a Onda">Contra Onda</option>
+            <option value="Sentido da Onda">Sentido da Onda</option>
+          </select>
+        </div>
+        <div class="form-group" id="ladosRaiosGroupInicio" style="display: none;">
+          <label for="ladosRaiosInicio">Quantidade de Lados</label>
+          <select id="ladosRaiosInicio">
+            <option value="">Selecione a quantidade de lados</option>
+            <option value="1">1 Lado</option>
+            <option value="2">2 Lados</option> 
+            <option value="ambos">Ambos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="horaInicio">Hora de Início</label>
+          <input type="datetime-local" id="horaInicio" required>
+        </div>
+        <button type="submit">Iniciar Produção</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="terminoPage" style="display: none;">
+    <div class="add-form">
+      <h3 style="color: #1a237e; margin-bottom: 20px;">Registrar Término de Produção</h3>
+      <form id="terminoForm">
+        <div class="form-group">
+          <label for="codigoProducao">Código da Produção</label>
+          <input type="text" 
+                 id="codigoProducao" 
+                 pattern="\d{7}" 
+                 maxlength="7"
+                 inputmode="numeric" 
+                 oninput="this.value = this.value.replace(/[^\d]/g, '').substring(0, 7)"
+                 required>
+        </div>
+        <div class="form-group">
+          <label for="horaTermino">Hora de Término</label>
+          <input type="datetime-local" id="horaTermino" required>
+        </div>
+        <div class="form-group">
+          <label for="quantidade">Quantidade</label>
+          <input type="number" id="quantidade" required>
+        </div>
+        <div class="form-group">
+          <label for="percaSetup">Perda de Setup</label>
+          <input type="number" id="percaSetup" required>
+        </div>
+        <div class="form-group">
+          <label for="pecasDanificadas">Peças Danificadas</label>
+          <input type="number" id="pecasDanificadas" required>
+        </div>
+        <div class="form-group">
+          <label for="retrabalho">Retrabalho</label>
+          <input type="number" id="retrabalho" required>
+        </div>
+        <button type="submit">Registrar Término</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="terminoRaiosPage" style="display: none;">
+    <div class="add-form">
+      <h3 style="color: #1a237e; margin-bottom: 20px;">Registrar Término de Produção - Raios</h3>
+      <form id="terminoRaiosForm">
+        <div class="form-group">
+          <label for="codigoProducaoRaios">Código da Produção</label>
+          <input type="text" 
+                 id="codigoProducaoRaios" 
+                 pattern="\d{7}" 
+                 maxlength="7"
+                 inputmode="numeric" 
+                 oninput="this.value = this.value.replace(/[^\d]/g, '').substring(0, 7)"
+                 required>
+        </div>
+        <div class="form-group">
+          <label for="horaTerminoRaios">Hora de Término</label>
+          <input type="datetime-local" id="horaTerminoRaios" required>
+        </div>
+        <div class="form-group">
+          <label for="quantidade1LadoRaios">Quantidade 1 Lado</label>
+          <input type="number" id="quantidade1LadoRaios" required>
+        </div>
+        <div class="form-group">
+          <label for="quantidade2LadosRaios">Quantidade 2 Lados</label>
+          <input type="number" id="quantidade2LadosRaios" required>
+        </div>
+        <div class="form-group">
+          <label for="percaSetupRaios">Perda de Setup</label>
+          <input type="number" id="percaSetupRaios" required>
+        </div>
+        <div class="form-group">
+          <label for="pecasDanificadasRaios">Peças Danificadas</label>
+          <input type="number" id="pecasDanificadasRaios" required>
+        </div>
+        <div class="form-group">
+          <label for="retrabalhoRaios">Retrabalho</label>
+          <input type="number" id="retrabalhoRaios" required>
+        </div>
+        <button type="submit">Registrar Término</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="recordsPage">
+    <h2 style="color: #1a237e; margin-bottom: 20px;">Registros de Produção</h2>
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+      <span style="color: #1a237e;">Excluir todos os dados</span>
+      <button onclick="productionSystem.deleteAllRecords()" class="delete-btn" style="padding: 5px 10px; font-size: 12px;">
+        Excluir
+      </button>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Turno</th>
+          <th>Colaborador</th>
+          <th>Cliente</th>
+          <th>Produto</th>
+          <th>Especificação</th>
+          <th>Hora de Início</th>
+          <th>Hora de Término</th>
+          <th>Quantidade</th>
+          <th>Perda de Setup</th>
+          <th>Peças Danificadas</th>
+          <th>Retrabalho</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+    </table>
+  </div>
+
+  <div id="raiosRecordsPage" style="display: none;">
+    <h2 style="color: #1a237e; margin-bottom: 20px;">Registros de Produção - Raios</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Turno</th>
+          <th>Colaborador</th>
+          <th>Cliente</th>
+          <th>Produto</th>
+          <th>Especificação</th>
+          <th>Quantidade de Lados</th>
+          <th>Hora de Início</th>
+          <th>Hora de Término</th>
+          <th>Quantidade 1 Lado</th>
+          <th>Quantidade 2 Lados</th>
+          <th>Total</th>
+          <th>Perda de Setup</th>
+          <th>Peças Danificadas</th>
+          <th>Retrabalho</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="raiosTableBody">
+      </tbody>
+    </table>
+  </div>
+
+  <div id="retrabalhoPage" style="display: none;">
+    <div class="analysis-container">
+      <h2 style="color: #1a237e; margin-bottom: 20px;">Análise de Retrabalho</h2>
+      
+      <!-- Add form for entering rework details -->
+      <div class="add-form">
+        <form id="retrabalhoForm">
+          <div class="form-group">
+            <label for="colaboradorRetrabalho">Colaborador</label>
+            <input type="text" id="colaboradorRetrabalho" required>
+          </div>
+          <div class="form-group">
+            <label for="horaInicioRetrabalho">Data e Hora de Início</label>
+            <input type="datetime-local" id="horaInicioRetrabalho" required>
+          </div>
+          <div class="form-group">
+            <label for="horaTerminoRetrabalho">Data e Hora de Término</label>
+            <input type="datetime-local" id="horaTerminoRetrabalho" required>
+          </div>
+          <div class="form-group">
+            <label for="quantidadeRetrabalho">Quantidade</label>
+            <input type="number" id="quantidadeRetrabalho" required>
+          </div>
+          <button type="submit">Registrar Retrabalho</button>
+        </form>
+      </div>
+
+      <!-- Table to display rework records -->
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Data/Hora Início</th>
+            <th>Data/Hora Término</th>
+            <th>Quantidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="retrabalhoTableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="relatoriosPage" style="display: none;">
+    <div class="analysis-container">
+      <h2 style="color: #1a237e; margin-bottom: 20px;">Relatórios</h2>
+      
+      <div class="total-summary" style="margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        <h3 style="color: #1a237e; margin-bottom: 15px;">Gerar Relatórios</h3>
+        
+        <div class="stat-card" style="margin-bottom: 20px;">
+          <h4>Relatório de Produção Lateral</h4>
+          <p>Gera um relatório PDF com os registros de produção lateral.</p>
+          <button onclick="productionSystem.generateLateralPDF()" class="nav-button" style="margin-top: 10px;">
+            Gerar PDF Produção Lateral
+          </button>
+        </div>
+
+        <div class="stat-card" style="margin-bottom: 20px;">
+          <h4>Relatório de Produção Raios</h4>
+          <p>Gera um relatório PDF com os registros de produção de raios.</p>
+          <button onclick="productionSystem.generateRaiosPDF()" class="nav-button" style="margin-top: 10px;">
+            Gerar PDF Produção Raios
+          </button>
+        </div>
+
+        <div class="stat-card" style="margin-bottom: 20px;">
+          <h4>Relatório de Paradas de Máquina</h4>
+          <p>Gera um relatório PDF com os registros de paradas.</p>
+          <button onclick="productionSystem.generateParadasPDF()" class="nav-button" style="margin-top: 10px;">
+            Gerar PDF Paradas
+          </button>
+        </div>
+
+        <div class="stat-card" style="margin-bottom: 20px;">
+          <h4>Relatório de Retrabalho</h4>
+          <p>Gera um relatório PDF com estatísticas de retrabalho.</p>
+          <button onclick="productionSystem.generateRetrabalhoPDF()" class="nav-button" style="margin-top: 10px;">
+            Gerar PDF Retrabalho
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="paradasPage" style="display: none;">
+    <h2 style="color: #1a237e; margin-bottom: 20px;">Registro de Paradas de Máquina</h2>
+    
+    <div class="add-form">
+      <form id="paradaForm">
+        <div class="form-group">
+          <label for="maquinaParada">Máquina</label>
+          <select id="maquinaParada" required>
+            <option value="">Selecione a máquina</option>
+            <option value="CPL1">CPL 1 - Selagem Lateral</option>
+            <option value="CPL2">CPL 2 - Selagem Raios</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tipoParada">Tipo de Parada</label>
+          <select id="tipoParada" required>
+            <option value="">Selecione o tipo de parada</option>
+            <option value="manutencao">Manutenção</option>
+            <option value="setup">Setup</option>
+            <option value="quebra">Quebra</option>
+            <option value="ajuste">Ajuste de Máquina</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="descricaoParada">Descrição</label>
+          <input type="text" id="descricaoParada" required>
+        </div>
+        <div class="form-group">
+          <label for="horaInicioParada">Hora de Início</label>
+          <input type="datetime-local" id="horaInicioParada" required>
+        </div>
+        <button type="submit">Registrar Parada</button>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Máquina</th>
+          <th>Tipo</th>
+          <th>Descrição</th>
+          <th>Início</th>
+          <th>Status</th>
+          <th>Resolução</th>
+          <th>Duração</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="paradasTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+class ProductionSystem {
+  constructor() {
+    this.records = JSON.parse(localStorage.getItem('productionRecords')) || [];
+    this.paradas = JSON.parse(localStorage.getItem('machineStops')) || [];
+    this.retrabalhos = JSON.parse(localStorage.getItem('retrabalhoRecords')) || [];
+    this.form = document.getElementById('productionForm');
+    this.terminoForm = document.getElementById('terminoForm');
+    this.terminoRaiosForm = document.getElementById('terminoRaiosForm');
+    this.retrabalhoForm = document.getElementById('retrabalhoForm');
+    this.tableBody = document.getElementById('tableBody');
+    this.paradaForm = document.getElementById('paradaForm');
+    this.codigoProducaoInicio = document.getElementById('codigoProducaoInicio');
+    this.updateNextCodeDisplay();
+
+    if (this.retrabalhoForm) {
+      this.retrabalhoForm.addEventListener('submit', (e) => this.handleRetrabalhoSubmit(e));
+    }
+
+    document.getElementById('especificacaoInicio').addEventListener('change', (e) => {
+      const ladosRaiosGroupInicio = document.getElementById('ladosRaiosGroupInicio');
+      const ladosRaiosInicio = document.getElementById('ladosRaiosInicio');
+      
+      if (e.target.value === 'Raios') {
+        ladosRaiosGroupInicio.style.display = 'block';
+        ladosRaiosInicio.required = true;
+      } else {
+        ladosRaiosGroupInicio.style.display = 'none';
+        ladosRaiosInicio.required = false;
+        ladosRaiosInicio.value = '';
+      }
+    });
+
+    this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    this.terminoForm.addEventListener('submit', (e) => this.handleTerminoSubmit(e));
+    this.terminoRaiosForm.addEventListener('submit', (e) => this.handleTerminoRaiosSubmit(e));
+    if (this.paradaForm) {
+      this.paradaForm.addEventListener('submit', (e) => this.handleParadaSubmit(e));
+    }
+
+    this.loadRecords();
+    this.loadParadas();
+    this.loadRetrabalhos();
+  }
+
+  handleRetrabalhoSubmit(e) {
+    e.preventDefault();
+    
+    const retrabalho = {
+      id: Date.now().toString(),
+      colaborador: document.getElementById('colaboradorRetrabalho').value,
+      horaInicio: document.getElementById('horaInicioRetrabalho').value,
+      horaTermino: document.getElementById('horaTerminoRetrabalho').value,
+      quantidade: parseInt(document.getElementById('quantidadeRetrabalho').value)
+    };
+
+    this.retrabalhos.push(retrabalho);
+    this.saveRetrabalhos();
+    this.loadRetrabalhos();
+    e.target.reset();
+    alert('Retrabalho registrado com sucesso!');
+  }
+
+  loadRetrabalhos() {
+    const tbody = document.getElementById('retrabalhoTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    
+    this.retrabalhos.forEach(retrabalho => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${retrabalho.colaborador}</td>
+        <td>${new Date(retrabalho.horaInicio).toLocaleString()}</td>
+        <td>${new Date(retrabalho.horaTermino).toLocaleString()}</td>
+        <td>${retrabalho.quantidade}</td>
+        <td>
+          <button class="delete-btn" onclick="productionSystem.deleteRetrabalho('${retrabalho.id}')">
+            Excluir
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  deleteRetrabalho(id) {
+    const password = prompt("Digite a senha para excluir:");
+    if (password === "CartonaleCPL") {
+      const index = this.retrabalhos.findIndex(r => r.id === id);
+      if (index !== -1) {
+        this.retrabalhos.splice(index, 1);
+        this.saveRetrabalhos();
+        this.loadRetrabalhos();
+      }
+    } else {
+      alert("Senha incorreta!");
+    }
+  }
+
+  saveRetrabalhos() {
+    localStorage.setItem('retrabalhoRecords', JSON.stringify(this.retrabalhos));
+  }
+
+  updateNextCodeDisplay() {
+    let nextId = 1;
+    if (this.records.length > 0) {
+      const sortedRecords = [...this.records].sort((a, b) => parseInt(a.id) - parseInt(b.id));
+      const lastRecord = sortedRecords[sortedRecords.length - 1];
+      nextId = parseInt(lastRecord.id) + 1;
+    }
+    const formattedId = String(nextId).padStart(7, '0');
+    
+    if (this.codigoProducaoInicio) {
+      this.codigoProducaoInicio.value = formattedId;
+    }
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    
+    const enteredId = document.getElementById('codigoProducaoInicio').value;
+    
+    if (this.records.some(record => record.id === enteredId)) {
+      alert('Este código de produção já existe!');
+      return;
+    }
+
+    const especificacao = document.getElementById('especificacaoInicio').value;
+    let finalEspecificacao = especificacao;
+    
+    if (especificacao === 'Raios') {
+      const ladosRaios = document.getElementById('ladosRaiosInicio').value;
+      if (!ladosRaios) {
+        alert('Por favor selecione a quantidade de lados para os raios.');
+        return;
+      }
+      finalEspecificacao = `Raios ${ladosRaios} lado(s)`;
+    }
+
+    const record = {
+      id: enteredId,
+      turno: document.getElementById('turnoProducao').value,
+      colaborador: document.getElementById('colaborador').value,
+      cliente: document.getElementById('cliente').value,
+      produto: document.getElementById('produto').value,
+      especificacao: finalEspecificacao,
+      horaInicio: document.getElementById('horaInicio').value,
+      horaTermino: null,
+      quantidade: null,
+      percaSetup: null,
+      pecasDanificadas: null,
+      retrabalho: null,
+      quantidade1Lado: null,
+      quantidade2Lados: null
+    };
+
+    this.records.push(record);
+    this.saveRecords();
+    this.loadRecords();
+    this.form.reset();
+    
+    this.updateNextCodeDisplay();
+    
+    alert(`Produção iniciada! Código: ${enteredId}`);
+  }
+
+  handleTerminoSubmit(e) {
+    e.preventDefault();
+
+    const codigo = document.getElementById('codigoProducao').value;
+
+    if (codigo.length !== 7) {
+      alert('O código deve conter exatamente 7 dígitos!');
+      return;
+    }
+
+    const formattedCodigo = String(codigo).padStart(7, '0');
+    const record = this.records.find(r => r.id === formattedCodigo);
+
+    if (!record) {
+      alert('Código de produção não encontrado!');
+      return;
+    }
+
+    record.horaTermino = document.getElementById('horaTermino').value;
+    record.quantidade = parseInt(document.getElementById('quantidade').value);
+    record.percaSetup = parseInt(document.getElementById('percaSetup').value);
+    record.pecasDanificadas = parseInt(document.getElementById('pecasDanificadas').value);
+    record.retrabalho = parseInt(document.getElementById('retrabalho').value);
+
+    this.saveRecords();
+    this.loadRecords();
+    this.updateNextCodeDisplay();
+    this.terminoForm.reset();
+
+    alert('Término de produção registrado com sucesso!');
+  }
+
+  handleTerminoRaiosSubmit(e) {
+    e.preventDefault();
+
+    const codigo = document.getElementById('codigoProducaoRaios').value;
+
+    if (codigo.length !== 7) {
+      alert('O código deve conter exatamente 7 dígitos!');
+      return;
+    }
+
+    const formattedCodigo = String(codigo).padStart(7, '0');
+    const record = this.records.find(r => r.id === formattedCodigo);
+
+    if (!record) {
+      alert('Código de produção não encontrado!');
+      return;
+    }
+
+    if (!record.especificacao || !record.especificacao.includes('Raios')) {
+      alert('Este código não corresponde a uma produção de raios!');
+      return;
+    }
+
+    record.horaTermino = document.getElementById('horaTerminoRaios').value;
+    record.quantidade1Lado = parseInt(document.getElementById('quantidade1LadoRaios').value);
+    record.quantidade2Lados = parseInt(document.getElementById('quantidade2LadosRaios').value);
+    record.quantidade = record.quantidade1Lado + record.quantidade2Lados;
+    record.percaSetup = parseInt(document.getElementById('percaSetupRaios').value);
+    record.pecasDanificadas = parseInt(document.getElementById('pecasDanificadasRaios').value);
+    record.retrabalho = parseInt(document.getElementById('retrabalhoRaios').value);
+
+    this.saveRecords();
+    this.loadRecords();
+    this.terminoRaiosForm.reset();
+
+    alert('Término de produção de raios registrado com sucesso!');
+  }
+
+  handleParadaSubmit(e) {
+    e.preventDefault();
+    
+    const parada = {
+      id: Date.now().toString(),
+      maquina: document.getElementById('maquinaParada').value,
+      tipo: document.getElementById('tipoParada').value,
+      descricao: document.getElementById('descricaoParada').value,
+      horaInicio: document.getElementById('horaInicioParada').value,
+      status: 'Máquina em Manutenção',
+      horaResolucao: null,
+      duracao: null
+    };
+
+    this.paradas.push(parada);
+    this.saveParadas();
+    this.loadParadas();
+    this.paradaForm.reset();
+    alert('Parada registrada com sucesso!');
+  }
+
+  loadParadas() {
+    const paradasTableBody = document.getElementById('paradasTableBody');
+    if (!paradasTableBody) return;
+
+    paradasTableBody.innerHTML = '';
+    
+    this.paradas.forEach(parada => {
+      const inicio = new Date(parada.horaInicio);
+      const maquinaText = parada.maquina === 'CPL1' ? 'CPL 1 - Selagem Lateral' : 'CPL 2 - Selagem Raios';
+      const resolucaoText = parada.horaResolucao ? new Date(parada.horaResolucao).toLocaleString() : '-';
+      const duracaoText = parada.duracao || '-';
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${maquinaText}</td>
+        <td>${this.getTipoParadaText(parada.tipo)}</td>
+        <td>${parada.descricao}</td>
+        <td>${inicio.toLocaleString()}</td>
+        <td>${parada.status}</td>
+        <td>${resolucaoText}</td>
+        <td>${duracaoText}</td>
+        <td>
+          ${parada.status === 'Máquina em Manutenção' ? 
+            `<button class="nav-button" onclick="productionSystem.resolverParada('${parada.id}')">
+              Resolver
+             </button>` : ''
+          }
+          <button class="delete-btn" onclick="productionSystem.deleteParada('${parada.id}')">
+            Excluir
+          </button>
+        </td>
+      `;
+      paradasTableBody.appendChild(row);
+    });
+  }
+
+  resolverParada(id) {
+    const parada = this.paradas.find(p => p.id === id);
+    if (parada) {
+      const agora = new Date();
+      parada.status = 'Resolvido';
+      parada.horaResolucao = agora.toISOString();
+      
+      // Calculate duration
+      const inicio = new Date(parada.horaInicio);
+      const diff = agora - inicio;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      parada.duracao = `${hours}h ${minutes}min`;
+      
+      this.saveParadas();
+      this.loadParadas();
+    }
+  }
+
+  deleteRecord(id, passwordRequired = true) {
+    const deleteRecord = () => {
+      const index = this.records.findIndex(r => r.id === id);
+      if (index !== -1) {
+        this.records.splice(index, 1);
+        this.saveRecords();
+        this.loadRecords();
+      }
+    };
+
+    if (passwordRequired) {
+      const password = prompt("Digite a senha para excluir:");
+      if (password === "CartonaleCPL") {
+        deleteRecord();
+      } else {
+        alert("Senha incorreta!");
+      }
+    } else {
+      deleteRecord();
+    }
+  }
+
+  deleteParada(id) {
+    const password = prompt("Digite a senha para excluir:");
+    if (password === "CartonaleCPL") {
+      const index = this.paradas.findIndex(p => p.id === id);
+      if (index !== -1) {
+        this.paradas.splice(index, 1);
+        this.saveParadas();
+        this.loadParadas();
+      }
+    } else {
+      alert("Senha incorreta!");
+    }
+  }
+
+  deleteAllRecords() {
+    const password = prompt("Digite a senha para excluir todos os registros:");
+    if (password === "CPLCartonale") {
+      if (confirm("Tem certeza que deseja excluir todos os registros?")) {
+        this.records = [];
+        this.saveRecords();
+        this.loadRecords();
+        this.generateDeletionReport();
+      }
+    } else {
+      alert("Senha incorreta!");
+    }
+  }
+
+  loadRecords() {
+    if (!this.tableBody) return;
+    
+    this.tableBody.innerHTML = '';
+    const raiosTableBody = document.getElementById('raiosTableBody');
+    if (raiosTableBody) {
+      raiosTableBody.innerHTML = '';
+    }
+    
+    this.updateNextCodeDisplay();
+    
+    if (this.records.length === 0) {
+      return;
+    }
+    
+    this.records.forEach(record => {
+      // Regular records table - only show if NOT raios
+      if (!record.especificacao || !record.especificacao.includes('Raios')) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${record.id}</td>
+          <td>${this.getTurnoText(record.turno)}</td>
+          <td>${record.colaborador}</td>
+          <td>${record.cliente}</td>
+          <td>${record.produto}</td>
+          <td>${record.especificacao || ''}</td>
+          <td>${new Date(record.horaInicio).toLocaleString()}</td>
+          <td>${record.horaTermino ? new Date(record.horaTermino).toLocaleString() : ''}</td>
+          <td>${record.quantidade || ''}</td>
+          <td>${record.percaSetup || ''}</td>
+          <td>${record.pecasDanificadas || ''}</td>
+          <td>${record.retrabalho || ''}</td>
+          <td class="actions">
+            <button class="delete-btn" onclick="productionSystem.deleteRecord('${record.id}')">
+              Excluir
+            </button>
+          </td>
+        `;
+        this.tableBody.appendChild(row);
+      }
+      
+      // Raios records table
+      const raiosTableBody = document.getElementById('raiosTableBody');
+      if (raiosTableBody && record.especificacao && record.especificacao.includes('Raios')) {
+        const ladosMatch = record.especificacao.match(/Raios (.*)/);
+        const lados = ladosMatch ? ladosMatch[1] : '';
+        
+        const total = (record.quantidade1Lado || 0) + (record.quantidade2Lados || 0);
+        
+        const raiosRow = document.createElement('tr');
+        raiosRow.innerHTML = `
+          <td>${record.id}</td>
+          <td>${this.getTurnoText(record.turno)}</td>
+          <td>${record.colaborador}</td>
+          <td>${record.cliente}</td>
+          <td>${record.produto}</td>
+          <td>Raios</td>
+          <td>${lados}</td>
+          <td>${new Date(record.horaInicio).toLocaleString()}</td>
+          <td>${record.horaTermino ? new Date(record.horaTermino).toLocaleString() : ''}</td>
+          <td>${record.quantidade1Lado || 0}</td>
+          <td>${record.quantidade2Lados || 0}</td>
+          <td>${total}</td>
+          <td>${record.percaSetup || ''}</td>
+          <td>${record.pecasDanificadas || ''}</td>
+          <td>${record.retrabalho || ''}</td>
+          <td class="actions">
+            <button class="delete-btn" onclick="productionSystem.deleteRecord('${record.id}')">
+              Excluir
+            </button>
+          </td>
+        `;
+        raiosTableBody.appendChild(raiosRow);
+      }
+    });
+  }
+
+  getTurnoText(turno) {
+    const turnoText = {
+      "1": "1º Turno",
+      "2": "2º Turno",
+      "3": "3º Turno"
+    };
+    return turnoText[turno] || "";
+  }
+
+  getTipoParadaText(tipo) {
+    const tipoText = {
+      "manutencao": "Manutenção",
+      "setup": "Setup",
+      "quebra": "Quebra",
+      "ajuste": "Ajuste de Máquina",
+      "outro": "Outro"
+    };
+    return tipoText[tipo] || tipo;
+  }
+
+  async generateLateralPDF() {
+    let content = document.createElement('div');
+    content.id = 'printSection';
+    content.style.padding = '20px';
+
+    // Title
+    let title = document.createElement('h2');
+    title.textContent = 'Relatório de Produção Lateral';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    content.appendChild(title);
+
+    // Calculate totals by shift
+    const turnoTotals = { "1": 0, "2": 0, "3": 0 };
+    const regularProds = this.records.filter(r => !r.especificacao?.includes('Raios'));
+    
+    regularProds.forEach(record => {
+      if (record.quantidade) {
+        turnoTotals[record.turno] += record.quantidade;
+      }
+    });
+
+    // Add summary section
+    let summary = document.createElement('div');
+    summary.innerHTML = `
+      <h3 style="margin: 15px 0;">Resumo por Turno</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background: #1a237e; color: white;">
+          <th style="border: 1px solid #ddd; padding: 8px;">1º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">2º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">3º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["1"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["2"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["3"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            turnoTotals["1"] + turnoTotals["2"] + turnoTotals["3"]
+          }</strong></td>
+        </tr>
+      </table>
+    `;
+    content.appendChild(summary);
+
+    // Add detailed records
+    if (regularProds.length > 0) {
+      content.innerHTML += `
+        <h3 style="margin: 15px 0;">Detalhes da Produção</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px;">
+          <thead>
+            <tr style="background: #1a237e; color: white;">
+              <th style="border: 1px solid #ddd; padding: 4px;">Código</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Turno</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Colaborador</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Cliente</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Produto</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${regularProds.map(r => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.id}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${this.getTurnoText(r.turno)}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.colaborador}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.cliente}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.produto}</td>
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: right;">${r.quantidade || 0}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Generate PDF
+    document.body.appendChild(content);
+    const opt = {
+      margin: 0.5,
+      filename: 'relatorio-producao-lateral.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opt).from(content).save();
+    document.body.removeChild(content);
+  }
+
+  async generateRaiosPDF() {
+    let content = document.createElement('div');
+    content.id = 'printSection';
+    content.style.padding = '20px';
+
+    // Title
+    let title = document.createElement('h2');
+    title.textContent = 'Relatório de Produção Raios';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    content.appendChild(title);
+
+    // Calculate totals by shift
+    const turnoTotals = { "1": 0, "2": 0, "3": 0 };
+    const raiosProds = this.records.filter(r => r.especificacao?.includes('Raios'));
+    
+    raiosProds.forEach(record => {
+      const total = (record.quantidade1Lado || 0) + (record.quantidade2Lados || 0);
+      turnoTotals[record.turno] += total;
+    });
+
+    // Add summary section
+    let summary = document.createElement('div');
+    summary.innerHTML = `
+      <h3 style="margin: 15px 0;">Resumo por Turno</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background: #1a237e; color: white;">
+          <th style="border: 1px solid #ddd; padding: 8px;">1º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">2º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">3º Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["1"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["2"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${turnoTotals["3"]}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            turnoTotals["1"] + turnoTotals["2"] + turnoTotals["3"]
+          }</strong></td>
+        </tr>
+      </table>
+    `;
+    content.appendChild(summary);
+
+    // Add detailed records
+    if (raiosProds.length > 0) {
+      content.innerHTML += `
+        <h3 style="margin: 15px 0;">Detalhes da Produção</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px;">
+          <thead>
+            <tr style="background: #1a237e; color: white;">
+              <th style="border: 1px solid #ddd; padding: 4px;">Código</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Turno</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Colaborador</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Cliente</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Produto</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">1 Lado</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">2 Lados</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${raiosProds.map(r => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.id}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${this.getTurnoText(r.turno)}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.colaborador}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.cliente}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.produto}</td>
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: right;">${r.quantidade1Lado || 0}</td>
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: right;">${r.quantidade2Lados || 0}</td>
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: right;"><strong>${
+                  (r.quantidade1Lado || 0) + (r.quantidade2Lados || 0)
+                }</strong></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Generate PDF
+    document.body.appendChild(content);
+    const opt = {
+      margin: 0.5,
+      filename: 'relatorio-producao-raios.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opt).from(content).save();
+    document.body.removeChild(content);
+  }
+
+  async generateParadasPDF() {
+    let content = document.createElement('div');
+    content.id = 'printSection';
+    content.style.padding = '20px';
+
+    // Title
+    let title = document.createElement('h2');
+    title.textContent = 'Relatório de Paradas de Máquina';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    content.appendChild(title);
+
+    // Calculate statistics by shift
+    const shiftStats = {
+        "1": { count: 0, totalDuration: 0 },
+        "2": { count: 0, totalDuration: 0 },
+        "3": { count: 0, totalDuration: 0 }
+    };
+
+    this.paradas.forEach(parada => {
+        const startTime = new Date(parada.horaInicio);
+        const hour = startTime.getHours();
+        
+        let shift;
+        if (hour >= 5 && hour < 14) shift = "1";
+        else if (hour >= 14 && hour < 22) shift = "2";
+        else shift = "3";
+
+        shiftStats[shift].count++;
+        
+        if (parada.duracao) {
+            const [hours, minutes] = parada.duracao.split('h ');
+            const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
+            shiftStats[shift].totalDuration += totalMinutes;
+        }
+    });
+
+    // Summary section
+    let summary = document.createElement('div');
+    summary.innerHTML = `
+      <h3 style="margin: 15px 0;">Resumo por Turno</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background: #1a237e; color: white;">
+          <th style="border: 1px solid #ddd; padding: 8px;">Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Quantidade de Paradas</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Tempo Total de Parada</th>
+        </tr>
+        ${Object.entries(shiftStats).map(([shift, stats]) => `
+          <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">${shift}º Turno</td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stats.count}</td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+              ${Math.floor(stats.totalDuration / 60)}h ${stats.totalDuration % 60}min
+            </td>
+          </tr>
+        `).join('')}
+        <tr style="background: #1a237e; color: white;">
+          <td style="border: 1px solid #ddd; padding: 8px;"><strong>Total</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;"><strong>${
+            Object.values(shiftStats).reduce((acc, curr) => acc + curr.count, 0)
+          }</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            Math.floor(Object.values(shiftStats).reduce((acc, curr) => acc + curr.totalDuration, 0) / 60)
+          }h ${
+            Object.values(shiftStats).reduce((acc, curr) => acc + curr.totalDuration, 0) % 60
+          }min</strong></td>
+        </tr>
+      </table>
+    `;
+    content.appendChild(summary);
+
+    // List of machine stops in table format
+    if (this.paradas.length > 0) {
+      content.innerHTML += `
+        <h3 style="margin: 15px 0;">Lista de Paradas</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px;">
+          <thead>
+            <tr style="background: #1a237e; color: white;">
+              <th style="border: 1px solid #ddd; padding: 4px;">Máquina</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Tipo</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Descrição</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Início</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Status</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Resolução</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Duração</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.paradas.map(p => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 4px;">${p.maquina === 'CPL1' ? 'CPL 1 - Selagem Lateral' : 'CPL 2 - Selagem Raios'}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${this.getTipoParadaText(p.tipo)}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${p.descricao}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${new Date(p.horaInicio).toLocaleString()}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${p.status}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${p.horaResolucao ? new Date(p.horaResolucao).toLocaleString() : '-'}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${p.duracao || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Generate PDF
+    document.body.appendChild(content);
+    const opt = {
+      margin: 0.5,
+      filename: 'relatorio-paradas.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opt).from(content).save();
+    document.body.removeChild(content);
+  }
+
+  async generateRetrabalhoPDF() {
+    let content = document.createElement('div');
+    content.id = 'printSection';
+    content.style.padding = '20px';
+
+    // Title
+    let title = document.createElement('h2');
+    title.textContent = 'Relatório de Retrabalho';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    content.appendChild(title);
+
+    // Calculate statistics by shift
+    const turnoStats = {
+      "1": { total: 0, completed: 0 },
+      "2": { total: 0, completed: 0 },
+      "3": { total: 0, completed: 0 }
+    };
+
+    // Calculate total rework needed from production records
+    this.records.forEach(record => {
+      if (record.retrabalho) {
+        const startTime = new Date(record.horaInicio);
+        const hour = startTime.getHours();
+        
+        let shift;
+        if (hour >= 5 && hour < 14) shift = "1";
+        else if (hour >= 14 && hour < 22) shift = "2";
+        else shift = "3";
+
+        turnoStats[shift].total += record.retrabalho;
+      }
+    });
+
+    // Calculate completed rework from retrabalho records
+    this.retrabalhos.forEach(retrabalho => {
+      const startTime = new Date(retrabalho.horaInicio);
+      const hour = startTime.getHours();
+      
+      let shift;
+      if (hour >= 5 && hour < 14) shift = "1";
+      else if (hour >= 14 && hour < 22) shift = "2";
+      else shift = "3";
+
+      turnoStats[shift].completed += retrabalho.quantidade;
+    });
+
+    // Summary section
+    let summary = document.createElement('div');
+    summary.innerHTML = `
+      <h3 style="margin: 15px 0;">Estatísticas por Turno</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background: #1a237e; color: white;">
+          <th style="border: 1px solid #ddd; padding: 8px;">Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Total para Retrabalho</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Retrabalho Concluído</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Restante</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Média por Turno</th>
+          <th style="border: 1px solid #ddd; padding: 8px;">Média de Conclusão</th>
+        </tr>
+        ${Object.entries(turnoStats).map(([turno, stats]) => {
+          const remaining = Math.max(0, stats.total - stats.completed);
+          const avgPerShift = stats.total > 0 ? (stats.total / this.records.filter(r => {
+            const hour = new Date(r.horaInicio).getHours();
+            return (turno === "1" && hour >= 5 && hour < 14) ||
+                   (turno === "2" && hour >= 14 && hour < 22) ||
+                   (turno === "3" && (hour >= 22 || hour < 5));
+          }).length).toFixed(2) : 0;
+          const completionRate = stats.total > 0 ? ((stats.completed / stats.total) * 100).toFixed(2) : 0;
+          
+          return `
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 8px;">${turno}º Turno</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${stats.total}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${stats.completed}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${remaining}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${avgPerShift}</td>
+              <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${completionRate}%</td>
+            </tr>
+          `;
+        }).join('')}
+        <tr style="background: #1a237e; color: white;">
+          <td style="border: 1px solid #ddd; padding: 8px;"><strong>Total</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            Object.values(turnoStats).reduce((acc, curr) => acc + curr.total, 0)
+          }</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            Object.values(turnoStats).reduce((acc, curr) => acc + curr.completed, 0)
+          }</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>${
+            Object.values(turnoStats).reduce((acc, curr) => acc + Math.max(0, curr.total - curr.completed), 0)
+          }</strong></td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">-</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">-</td>
+        </tr>
+      </table>
+    `;
+    content.appendChild(summary);
+
+    // Detailed records
+    if (this.retrabalhos.length > 0) {
+      content.innerHTML += `
+        <h3 style="margin: 15px 0;">Detalhes do Retrabalho</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px;">
+          <thead>
+            <tr style="background: #1a237e; color: white;">
+              <th style="border: 1px solid #ddd; padding: 4px;">Colaborador</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Início</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Término</th>
+              <th style="border: 1px solid #ddd; padding: 4px;">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.retrabalhos.map(r => `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 4px;">${r.colaborador}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${new Date(r.horaInicio).toLocaleString()}</td>
+                <td style="border: 1px solid #ddd; padding: 4px;">${new Date(r.horaTermino).toLocaleString()}</td>
+                <td style="border: 1px solid #ddd; padding: 4px; text-align: right;">${r.quantidade}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Generate PDF
+    document.body.appendChild(content);
+    const opt = {
+      margin: 0.5,
+      filename: 'relatorio-retrabalho.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opt).from(content).save();
+    document.body.removeChild(content);
+  }
+
+  saveRecords() {
+    localStorage.setItem('productionRecords', JSON.stringify(this.records));
+  }
+
+  saveParadas() {
+    localStorage.setItem('machineStops', JSON.stringify(this.paradas));
+  }
+}
+
+function showPage(pageId) {
+  document.getElementById('registroPage').classList.remove('page-active');
+  document.getElementById('recordsPage').classList.remove('page-active');
+  document.getElementById('terminoPage').style.display = 'none';
+  document.getElementById('terminoRaiosPage').style.display = 'none'; 
+  document.getElementById('retrabalhoPage').style.display = 'none';
+  document.getElementById('relatoriosPage').style.display = 'none';
+  document.getElementById('raiosRecordsPage').style.display = 'none';
+  document.getElementById('paradasPage').style.display = 'none';
+  
+  if (pageId === 'terminoPage' || pageId === 'terminoRaiosPage' || pageId === 'retrabalhoPage' || pageId === 'relatoriosPage' || pageId === 'raiosRecordsPage' || pageId === 'paradasPage') {
+    document.getElementById(pageId).style.display = 'block';
+  } else {
+    document.getElementById(pageId).classList.add('page-active');
+  }
+
+  if ((pageId === 'recordsPage' || pageId === 'raiosRecordsPage' || pageId === 'paradasPage') && window.productionSystem) {
+    window.productionSystem.loadRecords();
+    window.productionSystem.loadParadas();
+  }
+
+  if (pageId === 'retrabalhoPage') {
+    productionSystem.loadRetrabalhos();
+  }
+}
+
+document.getElementById('codigoProducao').addEventListener('input', function(e) {
+  if (this.value.length === 7) {
+    // Do nothing
+  }
+});
+
+const productionSystem = new ProductionSystem();
+
+setTimeout(() => {
+  const introVideo = document.getElementById('introVideo');
+  if (introVideo) {
+    introVideo.style.animation = 'fadeOut 1s ease-out forwards';
+    setTimeout(() => {
+      introVideo.remove();
+    }, 1000);
+  }
+}, 10000);
+</script>
+</body>
+</html>
